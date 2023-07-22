@@ -6,4 +6,4 @@ def index(request):
     context = {
         'items': range(5000),
     }
-    return render(request, template_name="main_app/index.html", context=context)
+    return render(request, template_name="cart_app/index.html", context=context)
