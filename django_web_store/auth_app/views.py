@@ -1,48 +1,54 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
-from django.views.generic import TemplateView
-
-from auth_app.forms import SingInForm
-from auth_app.forms import SingUpForm
+from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 
-class AuthSingInView(TemplateView):
+class AuthSingInView(LoginView):
     template_name = "auth_app/signin.html"
+    authentication_form = AuthenticationForm
 
     def get(self, request, *args, **kwargs):
 
-        context = {
-            "form": SingInForm(),
-        }
+        context = {"form": self.authentication_form()}
         return render(request, template_name=self.template_name, context=context)
 
     def post(self, request, *args, **kwargs):
 
-        form = SingInForm(request.POST)
+        form = self.authentication_form(request=request, data=request.POST)
         if not form.is_valid():
-            return redirect("auth:sign-in-page")
+            context = {
+                "form": form,
+                "errors": form.errors,
+            }
+            return render(request, template_name=self.template_name, context=context)
         return redirect("index:index-page")
 
 
-class AuthSingUpView(TemplateView):
+class AuthSingUpView(LoginView):
     template_name = "auth_app/signup.html"
+    authentication_form = UserCreationForm
 
     def get(self, request, *args, **kwargs):
 
         context = {
-            "form": SingUpForm(),
+            "form": self.authentication_form(),
         }
         return render(request, template_name=self.template_name, context=context)
 
     def post(self, request, *args, **kwargs):
 
-        form = SingUpForm(request.POST)
+        form = self.authentication_form(data=request.POST)
         if not form.is_valid():
-            return redirect("auth:sign-up-page")
+            context = {
+                "form": form,
+                "errors": form.errors,
+            }
+            return render(request, template_name=self.template_name, context=context)
         return redirect("index:index-page")
 
 
-class AuthSingOutView(TemplateView):
+class AuthSingOutView(LogoutView):
 
     def get(self, request, *args, **kwargs):
         return redirect("auth:sign-in-page")
