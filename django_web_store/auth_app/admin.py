@@ -27,7 +27,9 @@ class ProfileAdmin(UserAdmin):
     list_display = ("username", "email", "first_name", "last_name", "is_staff", "preview")
 
     def preview(self, obj):
-        return mark_safe(f'<img src="{obj.image.url}" width=50 height=50>')
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" width=50 height=50>')
+        return mark_safe('<img src="" width=50 height=50>')
 
 
 admin.site.register(User, ProfileAdmin)

@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+# from auth_app.models import User
+from django.contrib.auth import get_user_model
 
 
 class AuthSingInView(LoginView):
@@ -25,9 +27,16 @@ class AuthSingInView(LoginView):
         return redirect("index:index-page")
 
 
+class AuthSingUpCreationForm(UserCreationForm):
+
+    class Meta:
+        model = get_user_model()
+        fields = ('username', 'password1', 'password2')
+
+
 class AuthSingUpView(LoginView):
     template_name = "auth_app/signup.html"
-    authentication_form = UserCreationForm
+    authentication_form = AuthSingUpCreationForm
 
     def get(self, request, *args, **kwargs):
 
@@ -45,13 +54,12 @@ class AuthSingUpView(LoginView):
                 "errors": form.errors,
             }
             return render(request, template_name=self.template_name, context=context)
-        return redirect("index:index-page")
+        form.save()
+        return redirect("auth:sign-in-page")
 
 
 class AuthSingOutView(LogoutView):
-
-    def get(self, request, *args, **kwargs):
-        return redirect("auth:sign-in-page")
+    pass
 
 
 def index(request, *args, **kwargs):
