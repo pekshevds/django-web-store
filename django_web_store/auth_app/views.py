@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-# from auth_app.models import User
+from django.contrib.auth import authenticate, login
+
 from django.contrib.auth import get_user_model
 
 
@@ -24,7 +25,14 @@ class AuthSingInView(LoginView):
                 "errors": form.errors,
             }
             return render(request, template_name=self.template_name, context=context)
-        return redirect("index:index-page")
+        user = authenticate(request,
+                            username=form.cleaned_data.get("username", ""),
+                            password=form.cleaned_data.get("password", ""))
+        if user:
+            login(request, user)
+            return redirect("index:index-page")
+        else:
+            return redirect("index:sign-in-page")
 
 
 class AuthSingUpCreationForm(UserCreationForm):
