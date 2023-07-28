@@ -1,9 +1,17 @@
 from django.db import models
 
 
-class Category(models.Model):
-    name = models.CharField(verbose_name="Category", max_length=150, primary_key=True)
-    parent = models.ForeignKey("Category", related_name="childs1", blank=True, null=True, on_delete=models.PROTECT)
+class AbstractModel(models.Model):
+    id = models.BigAutoField(primary_key=True)
+
+    class Meta:
+        abstract = True
+
+
+class Category(AbstractModel):
+    name = models.CharField(verbose_name="Category", max_length=150, db_index=True)
+    code = models.CharField(verbose_name="code", max_length=11, db_index=True, default='')
+    parent = models.ForeignKey("Category", related_name="childs", blank=True, null=True, on_delete=models.PROTECT)
 
     def __str__(self) -> str:
         return self.name
@@ -13,12 +21,13 @@ class Category(models.Model):
         return cls.objects.filter(parent=None)
 
     @property
-    def childs(self):
+    def fetch_childs(self):
         return Category.objects.filter(parent=self)
 
 
-class Good(models.Model):
-    name = models.CharField(verbose_name="Good", max_length=150, primary_key=True)
+class Good(AbstractModel):
+    name = models.CharField(verbose_name="Good", max_length=150, db_index=True)
+    code = models.CharField(verbose_name="code", max_length=11, db_index=True, default='')
     category = models.ForeignKey("Category", related_name="goods", blank=True, null=True, on_delete=models.PROTECT)
 
     def __str__(self) -> str:
